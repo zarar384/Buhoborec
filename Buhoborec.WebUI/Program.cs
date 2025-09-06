@@ -10,7 +10,7 @@ using Buhoborec.Infrastructure.Absences.Repositories;
 using Buhoborec.Infrastructure.Persistence;
 using Buhoborec.Infrastructure.Services;
 using Buhoborec.Infrastructure.Tasks.Repositories;
-using Buhoborec.Infrastructure.WorkLogs;
+using Buhoborec.Infrastructure.WorkLogs.Repositories;
 using Buhoborec.WebUI.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
