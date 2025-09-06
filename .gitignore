@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Buhoborec.WebUI/Buhoborec.db
+/Buhoborec.WebUI/Buhoborec.db-shm
+/Buhoborec.WebUI/Buhoborec.db-wal
+/Buhoborec/Buhoborec.Infrastructure/Migrations/
