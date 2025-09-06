@@ -4,8 +4,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Buhoborec.Domain\Buhoborec.Domain.csproj" />
-    <ProjectReference Include="..\Buhoborec.Infrastructure\Buhoborec.Infrastructure.csproj" />
+	  <ProjectReference Include="..\Buhoborec.Domain\Buhoborec.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Mapster" Version="7.4.0" />

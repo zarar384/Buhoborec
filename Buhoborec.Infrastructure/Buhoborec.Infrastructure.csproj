@@ -10,6 +10,6 @@
 
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Buhoborec.Domain\Buhoborec.Domain.csproj" />
+	  <ProjectReference Include="..\Buhoborec.Application\Buhoborec.Application.csproj" />
   </ItemGroup>
 </Project>

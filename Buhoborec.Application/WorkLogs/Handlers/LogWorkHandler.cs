@@ -1,35 +1,35 @@
-using MediatR;
-using System.Threading.Tasks;
-using System.Threading;
-using Buhoborec.Application.WorkLogs.Commands;
 using Buhoborec.Application.Common.Interfaces;
+using Buhoborec.Application.WorkLogs.Commands;
+using Buhoborec.Application.WorkLogs.Repositories;
 using Buhoborec.Domain.Entities;
-using Buhoborec.Infrastructure.Persistence;
+using MediatR;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Buhoborec.Application.WorkLogs.Handlers;
-
-public class LogWorkHandler : IRequestHandler<LogWorkCommand, Guid>
+namespace Buhoborec.Application.WorkLogs.Handlers
 {
-    private readonly AppDbContext _db;
-    private readonly IDateTime _dateTime;
-
-    public LogWorkHandler(AppDbContext db, IDateTime dateTime)
+    public class LogWorkHandler : IRequestHandler<LogWorkCommand, Guid>
     {
-        _db = db;
-        _dateTime = dateTime;
-    }
+        private readonly IWorkLogRepository _repo;
+        private readonly IDateTime _dateTime;
 
-    public async Task<Guid> Handle(LogWorkCommand request, CancellationToken cancellationToken)
-    {
-        var wl = new WorkLog
+        public LogWorkHandler(IWorkLogRepository repo, IDateTime dateTime)
         {
-            UserId = request.UserId,
-            Type = request.Type,
-            Timestamp = request.Timestamp.ToUniversalTime()
-        };
-        _db.WorkLogs.Add(wl);
-        await _db.SaveChangesAsync(cancellationToken);
-        return wl.Id;
+            _repo = repo;
+            _dateTime = dateTime;
+        }
+
+        public async Task<Guid> Handle(LogWorkCommand request, CancellationToken cancellationToken)
+        {
+            var workLog = new WorkLog
+            {
+                UserId = request.UserId,
+                Type = request.Type,
+                Timestamp = request.Timestamp.ToUniversalTime()
+            };
+
+            return await _repo.AddAsync(workLog, cancellationToken);
+        }
     }
 }

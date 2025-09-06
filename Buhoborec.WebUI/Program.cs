@@ -1,10 +1,16 @@
-﻿using Buhoborec.Application.Common.Behaviors;
+﻿using Buhoborec.Application.Absences.Repositories;
+using Buhoborec.Application.Common.Behaviors;
 using Buhoborec.Application.Common.Extensions;
 using Buhoborec.Application.Common.Interfaces;
 using Buhoborec.Application.Mappings;
+using Buhoborec.Application.Tasks.Repositories;
 using Buhoborec.Application.Tasks.Validators;
+using Buhoborec.Application.WorkLogs.Repositories;
+using Buhoborec.Infrastructure.Absences.Repositories;
 using Buhoborec.Infrastructure.Persistence;
 using Buhoborec.Infrastructure.Services;
+using Buhoborec.Infrastructure.Tasks.Repositories;
+using Buhoborec.Infrastructure.WorkLogs;
 using Buhoborec.WebUI.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +48,9 @@ builder.Services.AddApplicationValidators(typeof(CreateTaskValidator).Assembly);
 // Services
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddSingleton<IDateTime, SystemDateTime>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<IAbsenceRepository, AbsenceRepository>();
+builder.Services.AddScoped<IWorkLogRepository, WorkLogRepository>();
 
 // UI
 builder.Services.AddMudServices();
