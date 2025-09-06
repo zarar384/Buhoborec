@@ -1,0 +1,116 @@
+@page "/tasks"
+@inject IMediator Mediator
+@using CTDE = Buhoborec.Domain.Enums.TaskStatus;
+
+<h3>Tasks</h3>
+
+<MudPaper Class="pa-4">
+    <EditForm Model="@newTask" OnValidSubmit="CreateTask">
+        <MudStack Spacing="2">
+            <MudTextField @bind-Value="newTask.Title" Label="Title" Required="true" />
+            <MudTextField @bind-Value="newTask.Description" Label="Description" />
+            <MudTextField @bind-Value="newTask.AssignedTo" Label="Assign to" />
+            <MudDatePicker @bind-Date="newTaskDue" Label="Due date" PickerVariant="PickerVariant.Inline" />
+            <MudButton Variant="Variant.Filled" Type="Submit">Create</MudButton>
+        </MudStack>
+    </EditForm>
+</MudPaper>
+
+<MudDivider Class="my-4" />
+
+<MudTable Items="tasks" Dense="true">
+    <HeaderContent>
+        <MudTh>Title</MudTh>
+        <MudTh>Assigned</MudTh>
+        <MudTh>Due</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Title</MudTd>
+        <MudTd>@context.AssignedTo</MudTd>
+        <MudTd>@(context.DueDate?.ToString("yyyy-MM-dd") ?? "-")</MudTd>
+        <MudTd>@context.Status</MudTd>
+        <MudTd>
+            <MudButton Size="Size.Small" OnClick="@(()=>Edit(context))">Edit</MudButton>
+            <MudButton Size="Size.Small" Color="Color.Error" OnClick="@(()=>Delete(context.Id))">Delete</MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+<MudDialog @bind-IsOpen="isEditDialog">
+    <DialogContent>
+        <MudPaper Class="pa-4">
+            <EditForm Model="editModel" OnValidSubmit="SaveEdit">
+                <MudStack Spacing="2">
+                    <MudTextField @bind-Value="editModel.Title" Label="Title" Required="true" />
+                    <MudTextField @bind-Value="editModel.Description" Label="Description" />
+                    <MudTextField @bind-Value="editModel.AssignedTo" Label="Assign to" />
+                    <MudDatePicker @bind-Date="editDue" Label="Due date" PickerVariant="PickerVariant.Inline" />
+                    <MudSelect @bind-Value="editModel.Status" Label="Status">
+                        <MudSelectItem Value="@CTDE.New">New</MudSelectItem>
+                        <MudSelectItem Value="@CTDE.InProgress">InProgress</MudSelectItem>
+                        <MudSelectItem Value="@CTDE.Done">Done</MudSelectItem>
+                    </MudSelect>
+                    <MudButton Type="Submit" Variant="Variant.Filled">Save</MudButton>
+                </MudStack>
+            </EditForm>
+        </MudPaper>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    List<Buhoborec.Domain.Entities.TaskItem> tasks = new();
+    Buhoborec.Domain.Entities.TaskItem newTask = new() { Title = "" };
+    DateTime? newTaskDue;
+    bool isEditDialog = false;
+    Buhoborec.Domain.Entities.TaskItem editModel = new();
+    DateTime? editDue;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    async Task Load()
+    {
+        tasks = await Mediator.Send(new GetTasksQuery());
+        StateHasChanged();
+    }
+
+    async Task CreateTask()
+    {
+        await Mediator.Send(new CreateTaskCommand(newTask.Title, newTask.Description, newTask.AssignedTo, newTaskDue));
+        newTask = new Buhoborec.Domain.Entities.TaskItem { Title = "" };
+        newTaskDue = null;
+        await Load();
+    }
+
+    void Edit(Buhoborec.Domain.Entities.TaskItem t)
+    {
+        editModel = new Buhoborec.Domain.Entities.TaskItem
+        {
+            Id = t.Id,
+            Title = t.Title,
+            Description = t.Description,
+            AssignedTo = t.AssignedTo,
+            DueDate = t.DueDate,
+            Status = t.Status
+        };
+        editDue = t.DueDate;
+        isEditDialog = true;
+    }
+
+    async Task SaveEdit()
+    {
+        await Mediator.Send(new UpdateTaskCommand(editModel.Id, editModel.Title, editModel.Description, editModel.AssignedTo, editDue, editModel.Status));
+        isEditDialog = false;
+        await Load();
+    }
+
+    async Task Delete(Guid id)
+    {
+        await Mediator.Send(new DeleteTaskCommand(id));
+        await Load();
+    }
+}

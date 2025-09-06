@@ -1,0 +1,50 @@
+@page "/worklog"
+@using Microsoft.EntityFrameworkCore
+@inject IMediator Mediator
+
+<h3>Work log</h3>
+<MudPaper Class="pa-4">
+    <MudStack Spacing="2">
+        <MudButton Variant="Variant.Filled" OnClick="() => Mark(Buhoborec.Domain.Enums.WorkLogType.Start)">Пришёл</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="() => Mark(Buhoborec.Domain.Enums.WorkLogType.LunchStart)">На обед</MudButton>
+        <MudButton Variant="Variant.Filled" OnClick="() => Mark(Buhoborec.Domain.Enums.WorkLogType.LunchEnd)">Вернулся</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => Mark(Buhoborec.Domain.Enums.WorkLogType.End)">Ушёл</MudButton>
+    </MudStack>
+</MudPaper>
+<MudDivider Class="my-4" />
+<h4>История</h4>
+<MudTable Items="logs">
+    <HeaderContent>
+        <MudTh>Type</MudTh>
+        <MudTh>Timestamp (UTC)</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Type</MudTd>
+        <MudTd>@context.Timestamp.ToString("u")</MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<Buhoborec.Domain.Entities.WorkLog> logs = new();
+    private string userId = "user-1";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLogs();
+    }
+
+    private async Task Mark(Buhoborec.Domain.Enums.WorkLogType type)
+    {
+        var cmd = new Buhoborec.Application.WorkLogs.Commands.LogWorkCommand(userId, type, DateTime.UtcNow);
+        await Mediator.Send(cmd);
+        await LoadLogs();
+    }
+
+    private async Task LoadLogs()
+    {
+        using var scope = ProgramScoped.ServiceProvider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<Buhoborec.Infrastructure.Persistence.AppDbContext>();
+        logs = await db.WorkLogs.OrderByDescending(w => w.Timestamp).Take(50).ToListAsync();
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,67 @@
+@page "/calendar"
+@inject IMediator Mediator
+
+<h3>Calendar of Absences</h3>
+
+<MudPaper Class="pa-4">
+    <EditForm Model="newAbsence" OnValidSubmit="CreateAbsence">
+        <MudStack Spacing="2">
+            <MudTextField @bind-Value="newAbsence.UserId" Label="UserId" Required="true" />
+            <MudDatePicker @bind-Date="newStart" Label="Start date" PickerVariant="PickerVariant.Inline" />
+            <MudDatePicker @bind-Date="newEnd" Label="End date" PickerVariant="PickerVariant.Inline" />
+            <MudTextField @bind-Value="newAbsence.Reason" Label="Reason" />
+            <MudButton Type="Submit" Variant="Variant.Filled">Create Absence</MudButton>
+        </MudStack>
+    </EditForm>
+</MudPaper>
+
+<MudDivider Class="my-4" />
+
+<MudTable Items="absences">
+    <HeaderContent>
+        <MudTh>User</MudTh>
+        <MudTh>Start</MudTh>
+        <MudTh>End</MudTh>
+        <MudTh>Reason</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.UserId</MudTd>
+        <MudTd>@context.StartDate.ToString("yyyy-MM-dd")</MudTd>
+        <MudTd>@context.EndDate.ToString("yyyy-MM-dd")</MudTd>
+        <MudTd>@context.Reason</MudTd>
+        <MudTd><MudButton Size="Size.Small" Color="Color.Error" OnClick="() => Delete(context.Id)">Delete</MudButton></MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    List<Buhoborec.Domain.Entities.Absence> absences = new();
+    Buhoborec.Domain.Entities.Absence newAbsence = new() { UserId = "" };
+    DateTime? newStart = DateTime.Today;
+    DateTime? newEnd = DateTime.Today;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    async Task Load()
+    {
+        absences = await Mediator.Send(new GetAbsencesQuery());
+        StateHasChanged();
+    }
+
+    async Task CreateAbsence()
+    {
+        await Mediator.Send(new CreateAbsenceCommand(newAbsence.UserId, newStart ?? DateTime.Today, newEnd ?? DateTime.Today, newAbsence.Reason));
+        newAbsence = new Buhoborec.Domain.Entities.Absence { UserId = "" };
+        newStart = DateTime.Today; newEnd = DateTime.Today;
+        await Load();
+    }
+
+    async Task Delete(Guid id)
+    {
+        await Mediator.Send(new DeleteAbsenceCommand(id));
+        await Load();
+    }
+}
