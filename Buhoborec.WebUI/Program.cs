@@ -11,7 +11,6 @@ using Buhoborec.Infrastructure.Persistence;
 using Buhoborec.Infrastructure.Services;
 using Buhoborec.Infrastructure.Tasks.Repositories;
 using Buhoborec.Infrastructure.WorkLogs.Repositories;
-using Buhoborec.WebUI.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -52,16 +51,18 @@ builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<IAbsenceRepository, AbsenceRepository>();
 builder.Services.AddScoped<IWorkLogRepository, WorkLogRepository>();
 
+// Hosted
+builder.Services.AddHostedService<DatabaseInitializationService>();
+
 // UI
 builder.Services.AddMudServices();
 
 var app = builder.Build();
 
-// Migrate database
-if (app.Environment.IsDevelopment())
-{
-    await app.InitializeDatabaseAsync();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    await app.InitializeDatabaseAsync();
+//}
 
 ProgramScoped.ServiceProvider = app.Services;
 
